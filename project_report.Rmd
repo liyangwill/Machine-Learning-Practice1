@@ -7,7 +7,7 @@ output:
     toc: yes
 ---
 
-```{r prep, echo = F, message = F}
+```{r}
 library(caret)
 library(randomForest)
 library(rpart)
@@ -20,7 +20,7 @@ set.seed(1234)
 
 ### Load data 
 * Loading
-```{r data, eval = F}
+```{r}
 trainUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 testUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
 training <- read.csv(url(trainUrl), na.strings=c("NA","#DIV/0!",""))
@@ -30,7 +30,7 @@ dim(testing)
 ```
 
 * Partition traning set into subtraining (60%) and subtesting (40%)
-```{r data, eval = F}
+```{r}
 inTrain <- createDataPartition(y=training$classe, p=0.6, list=FALSE)
 myTraining <- training[inTrain, ]
 myTesting <- training[-inTrain, ]
@@ -38,7 +38,7 @@ myTesting <- training[-inTrain, ]
 
 ### Cleaning data
 * Cleaning NearZeroVariance Variables  
-```{r data, eval = F}
+```{r}
 myDataNZV <- nearZeroVar(myTraining, saveMetrics=TRUE)
 myNZVvars <- names(myTraining) %in% c("new_window", "kurtosis_roll_belt", "kurtosis_picth_belt",
 "kurtosis_yaw_belt", "skewness_roll_belt", "skewness_roll_belt.1", "skewness_yaw_belt",
@@ -59,13 +59,13 @@ myTraining <- myTraining[!myNZVvars]
 ```
 
 * Removing first column of Dataset, user name should not be indicative to result at all.
-```{r data, eval = F}
+```{r}
 myTraining <- myTraining[c(-1)]
 ```
 
 * Plot the two features that have highest correlation with `classe` and color with `classe` to see if we can separate response based on these features.            
 * Cleaning Variables with too many NAs. For Variables that have more than a 60% threshold of NA’s they will be removed:
-```{r data, eval = F}
+```{r}
 training_prd <- myTraining 
 for(i in 1:length(myTraining)) { #for every column in the training dataset
         if( sum( is.na( myTraining[, i] ) ) /nrow(myTraining) >= .6 ) { #if n?? NAs > 60% of total observations
@@ -80,13 +80,13 @@ for(i in 1:length(myTraining)) { #for every column in the training dataset
 dim(training_prd)
 ```
 
-```{r data, eval = F}
+```{r}
 myTraining <- training_prd
 rm(training_prd)
 ```
 
 * Apply cleaning processes to subtesting set, and remove `classes` in testing set
-```{r data, eval = F}
+```{r}
 step1 <- colnames(myTraining)
 step2 <- colnames(myTraining[, -58]) #remove classes colume
 myTesting <- myTesting[step1]
@@ -96,14 +96,14 @@ testing <- testing[step2]
 ## Using Ml algorithm
 
 *Decision Tree
-```{r data, eval = F}
+```{r}
 DecTree <- rpart(classe ~ ., data=myTraining, method="class")
 predictionsDT <- predict(DecTree, myTesting, type = "class")
 confusionMatrix(predictionsDT, myTesting$classe)
 ```
 
 * Radom forest
-```{r data, eval = F}
+```{r}
 RadForest <- randomForest(classe ~. , data=myTraining)
 predictionsRF <- predict(RadForest, myTesting, type = "class")
 confusionMatrix(predictionsRF, myTesting$classe)
@@ -111,7 +111,7 @@ confusionMatrix(predictionsRF, myTesting$classe)
 The random forests algorithm generated a better model with higher accuracy.   
 
 ### Generating results to submit as answers for the Assignment:
-```{r data, eval = F}
+```{r}
 for (i in 1:length(testing) ) {
         for(j in 1:length(myTraining)) {
         if( length( grep(names(myTraining[i]), names(testing)[j]) ) ==1)  {
