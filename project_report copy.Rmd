@@ -1,8 +1,0 @@
----
-title: "Practical Machine Learning Course Project Report"
-author: "liyangwill"
-date: "Febrary 06, 2017"
-output:
-  html_document:
-    toc: yes
----
